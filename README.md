@@ -10,6 +10,8 @@ Service 2,TextGen Code,https://github.com/consultbibek-beep/textgen-service.git
 #Start
 docker-compose up --build
 
+http://localhost:8080/
+
 #Stop all running docker
 docker stop $(docker ps -q)
 
@@ -24,3 +26,4 @@ git submodule add https://github.com/consultbibek-beep/textgen-service.git textg
 
 # Commit the submodule references (the .gitmodules file is created here)
 git commit -m "config: Added frontend and textgen as Git submodules"
+

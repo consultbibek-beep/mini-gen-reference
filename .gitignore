@@ -13,13 +13,16 @@ wheels/
 .env
 
 # Ignore submodules
-textgen-service/
-frontend-service/
+# textgen-service/
+# frontend-service/
 
 # Byte-compiled files
 *.pyc
 
 # Compiled Python files
 __pycache__/
+
+# macOS system files
+.DS_Store
 
 
