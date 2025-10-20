@@ -1,7 +1,6 @@
 # mini-gen/k8s-manifests/k8s-manifests.yaml
-# This manifest uses variable substitution ($GROQ_API_KEY)
-# which is resolved by deploy_instructions.sh before being sent to kubectl.
-# Execution command example: kubectl apply -f mini-gen/k8s-manifests/k8s-manifests.yaml
+# This manifest is FIXED to use dynamic tags and imagePullSecrets.
+
 ---
 
 # 1. ConfigMap for Environment Variables (API Key)
@@ -10,8 +9,6 @@ kind: ConfigMap
 metadata:
   name: textgen-config
 data:
-  # The value is set to a shell variable reference.
-  # THIS MUST BE $GROQ_API_KEY. The shell script will replace this before deployment.
   GROQ_API_KEY: $GROQ_API_KEY
 
 ---
@@ -33,28 +30,23 @@ spec:
       labels:
         app: textgen
     spec:
+      # FIX 1: ADD IMAGE PULL SECRET
+      imagePullSecrets:
+        - name: docker-hub-secret
       containers:
         - name: textgen-api
-          # Use the tag you will build locally (e.g., mini-gen/textgen:latest)
-          # After move to dockerhub
-          # image: mini-gen/textgen:latest
-          # imagePullPolicy: Never # Instructs K8s to use the local Docker Desktop image
-          image: consultbibek/mini-gen-textgen:latest
-          imagePullPolicy: IfNotPresent  # allows reuse if already cached locally
+          # FIX 2: USE DYNAMIC TAG VARIABLE
+          image: consultbibek/mini-gen-textgen:$TEXTGEN_TAG
+          # FIX 3: USE ALWAYS TO FORCE PULL
+          imagePullPolicy: Always
           ports:
             - containerPort: 5001
           env:
-            # This defines the GROQ_API_KEY environment variable inside the container
-            # and tells it to pull the value from the 'textgen-config' ConfigMap.
             - name: GROQ_API_KEY
               valueFrom:
                 configMapKeyRef:
                   name: textgen-config
                   key: GROQ_API_KEY
-            # Added for clarity, but not strictly necessary:
-            # Also define the host for the frontend to connect to internally
-            # - name: TEXTGEN_HOST
-            #   value: "http://textgen:5001" # Internal K8s Service Name
 
 ---
 
@@ -62,7 +54,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: textgen # This is the internal DNS name used by the frontend
+  name: textgen
   labels:
     app: textgen
 spec:
@@ -93,20 +85,20 @@ spec:
       labels:
         app: frontend
     spec:
+      # FIX 1: ADD IMAGE PULL SECRET
+      imagePullSecrets:
+        - name: docker-hub-secret
       containers:
         - name: frontend-web
-          # Use the tag you will build locally (e.g., mini-gen/frontend:latest)
-          # After move to dockerhub
-          # image: mini-gen/frontend:latest
-          # imagePullPolicy: Never
-          image: consultbibek/mini-gen-frontend:latest  # pulled from Docker Hub
-          imagePullPolicy: IfNotPresent  # allows reuse if already cached locally
+          # FIX 2: USE DYNAMIC TAG VARIABLE
+          image: consultbibek/mini-gen-frontend:$FRONTEND_TAG
+          # FIX 3: USE ALWAYS TO FORCE PULL
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
           env:
-            # Configure the environment variable to point to the internal K8s service name.
             - name: TEXTGEN_HOST
-              value: "http://textgen:5001" # Matches the Service name above
+              value: "http://textgen:5001"
 
 ---
 
@@ -118,12 +110,10 @@ metadata:
   labels:
     app: frontend
 spec:
-  # NodePort makes the service reachable on a high port (30000-32767) on the host machine.
   type: NodePort
   selector:
     app: frontend
   ports:
     - protocol: TCP
-      port: 80          # The service listens on port 80
-      targetPort: 5000  # Forwards traffic to the container's port 5000
-      # nodePort will be dynamically assigned by K8s
+      port: 80
+      targetPort: 5000

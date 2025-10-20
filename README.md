@@ -54,3 +54,32 @@ kubectl delete deployment frontend-deployment textgen-deployment
 kubectl delete service frontend-service textgen
 kubectl delete configmap textgen-config
 kubectl get all
+
+# CI/CD 
+# Updated Project Str
+
+mini-gen/
+├── frontend-service/
+│   ├── app.py
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   ├── requirements.txt
+│   └── .github/
+│       └── workflows/
+│           └── docker-publish.yml
+│
+├── textgen-service/
+│   ├── app.py
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   ├── requirements.txt
+│   └── .github/
+│       └── workflows/
+│           └── docker-publish.yml
+│
+├── k8s-manifests/
+│   └── k8s-manifests.yaml
+├── docker-compose.yml
+├── .env
+└── deploy_instructions.sh
+
