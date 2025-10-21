@@ -83,3 +83,38 @@ mini-gen/
 ├── .env
 └── deploy_instructions.sh
 
+# Updated Project Str
+
+The latest, consolidated project structure for your `mini-gen` setup is provided below. This structure incorporates all the final files and naming conventions confirmed during the troubleshooting process, particularly the separate stop script and the corrected CI/CD workflow names.
+
+## Final Project Structure
+
+```
+mini-gen/
+├── .env                          <-- Contains DOCKER_HUB and GROQ_API_KEY credentials
+├── docker-compose.yml            <-- For local Docker development/testing
+├── deploy_instructions.sh        <-- Main script to BUILD and DEPLOY to Kubernetes (using envsubst)
+├── deploy_instructions_stop.sh   <-- New script to CLEAN UP all Kubernetes resources
+
+├── k8s-manifests/
+│   └── k8s-manifests.yaml        <-- Kubernetes manifests (uses $FRONTEND_TAG, $TEXTGEN_TAG, and $GROQ_API_KEY)
+
+├── frontend-service/             <-- Separate GitHub Repository (Service 1)
+│   ├── app.py
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   ├── requirements.txt
+│   └── .github/
+│       └── workflows/
+│           └── frontend-publish.yml  <-- FINAL CI/CD Workflow (with multi-arch, correct driver, and caching)
+
+└── textgen-service/              <-- Separate GitHub Repository (Service 2)
+    ├── app.py
+    ├── Dockerfile
+    ├── pyproject.toml
+    ├── requirements.txt
+    └── .github/
+        └── workflows/
+            └── textgen-publish.yml   <-- FINAL CI/CD Workflow (with multi-arch, correct driver, and caching)
+```
+
