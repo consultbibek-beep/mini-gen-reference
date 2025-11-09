@@ -118,3 +118,34 @@ mini-gen/
             └── textgen-publish.yml   <-- FINAL CI/CD Workflow (with multi-arch, correct driver, and caching)
 ```
 
+# Migration: Refer migrate_fixes.sh
+
+Step-by-Step Summary of Changes
+
+Update k8s-manifests.yaml (Critical Fix)
+
+This step resolves the ErrImagePull error by fixing the image repository names in the Kubernetes Deployment manifests.
+
+Image Name Correction: The missing mini-gen- prefix is added to both Docker image paths (e.g., consultbibek/frontend-service-search becomes consultbibek/mini-gen-frontend-search). This is necessary because your CI/CD workflows are configured to push images with this prefix.
+
+Object Synchronization: Ensures Kubernetes object names, labels, and selectors align with the new schema (e.g., textgen-deployment-rag, frontend-service-search).
+
+Update docker-compose.yml (Local Environment)
+
+This step updates your local development configuration to reflect the new service structure.
+
+Service & Context Renaming: Updates service names (e.g., frontend -> frontend-search) and their corresponding build contexts to the new directory names (e.g., ./frontend-service -> ./frontend-service-search).
+
+Internal Networking: Updates the frontend's TEXTGEN_HOST environment variable to point to the new backend service name (http://textgen-rag:5001).
+
+Update deploy_instructions_stop.sh (Cleanup Script)
+
+This step corrects the project name referenced in the script's output messages for better clarity and consistency.
+
+Message Correction: The project name in the echo messages is updated from mini-gen to mini-gen-search.
+
+Update GitHub Workflow Files (*.yml) (CI/CD Synchronization)
+
+This step ensures full synchronization of image repository names within the CI/CD pipeline, primarily confirming that caching references match the new repository names.
+
+Caching Consistency: Confirms that the cache-from and cache-to references in both frontend-publish.yml and textgen-publish.yml use the correct, full Docker Hub repository name (e.g., consultbibek/mini-gen-frontend-search:buildcache).
